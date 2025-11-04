@@ -11,10 +11,58 @@ provider "aws" {
   region = var.region_name
 }
 
+resource "aws_vpc" "jenkins" {
+  cidr_block           = "10.10.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
+  tags = {
+    Name = "jenkins-vpc"
+  }
+}
+
+resource "aws_internet_gateway" "jenkins" {
+  vpc_id = aws_vpc.jenkins.id
+
+  tags = {
+    Name = "jenkins-igw"
+  }
+}
+
+resource "aws_subnet" "jenkins_public" {
+  vpc_id                  = aws_vpc.jenkins.id
+  cidr_block              = "10.10.1.0/24"
+  availability_zone       = "${var.region_name}a"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "jenkins-public-a"
+  }
+}
+
+resource "aws_route_table" "jenkins_public" {
+  vpc_id = aws_vpc.jenkins.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.jenkins.id
+  }
+
+  tags = {
+    Name = "jenkins-public-rt"
+  }
+}
+
+resource "aws_route_table_association" "jenkins_public" {
+  subnet_id      = aws_subnet.jenkins_public.id
+  route_table_id = aws_route_table.jenkins_public.id
+}
+
 # STEP1: CREATE SG
 resource "aws_security_group" "my-sg" {
   name        = "JENKINS-SERVER-SG"
   description = "Jenkins Server Ports"
+  vpc_id      = aws_vpc.jenkins.id
   
   # Port 22 is required for SSH Access
   ingress {
@@ -135,10 +183,12 @@ resource "aws_security_group" "my-sg" {
 
 # STEP2: CREATE EC2 USING PEM & SG
 resource "aws_instance" "my-ec2" {
-  ami           = var.ami   
-  instance_type = var.instance_type
-  key_name      = var.key_name        
-  vpc_security_group_ids = [aws_security_group.my-sg.id]
+  ami                         = var.ami
+  instance_type               = var.instance_type
+  key_name                    = var.key_name
+  subnet_id                   = aws_subnet.jenkins_public.id
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.my-sg.id]
   
   root_block_device {
     volume_size = var.volume_size

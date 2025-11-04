@@ -2,10 +2,10 @@ pipeline {
     agent any
     
     parameters {
-        string(name: 'REPO_URL', defaultValue: 'https://github.com/pandacloud1/DevopsProject2.git', description: 'Git repository URL')
+        string(name: 'REPO_URL', defaultValue: 'https://github.com/AadityaJha01/DevopsProject.git', description: 'Git repository URL')
         string(name: 'REPO_BRANCH', defaultValue: 'main', description: 'Git branch to build')
         string(name: 'ECR_REPO_NAME', defaultValue: 'skycast-weather', description: 'Enter repository name')
-        string(name: 'AWS_ACCOUNT_ID', defaultValue: '123456789012', description: 'Enter AWS Account ID')
+        string(name: 'AWS_ACCOUNT_ID', defaultValue: '215764924067', description: 'Enter AWS Account ID')
     }
     
     tools {
