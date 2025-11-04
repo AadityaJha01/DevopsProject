@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skycast-app
+  labels:
+    app: skycast-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: skycast-app
+  template:
+    metadata:
+      labels:
+        app: skycast-app
+    spec:
+      containers:
+        - name: skycast-web
+          image: 309395755719.dkr.ecr.us-east-1.amazonaws.com/skycast-weather:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+...
