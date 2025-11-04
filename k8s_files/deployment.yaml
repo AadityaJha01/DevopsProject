@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: skycast-web
-          image: 309395755719.dkr.ecr.us-east-1.amazonaws.com/skycast-weather:latest
+          image: 215764924067.dkr.ecr.us-east-1.amazonaws.com/skycast-weather:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
